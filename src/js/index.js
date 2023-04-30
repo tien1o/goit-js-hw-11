@@ -1,60 +1,65 @@
 import '../css/styles.css';
-import { PixabayAPI } from '../js/image-libriary';
+import { searchImages } from '../js/image-libriary';
 import Notiflix from 'notiflix';
-import SimpleLightbox, { __esModule } from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const pixabayAPI = new PixabayAPI();
+const imageSearcher = {
+  query: '',
+  response: function () {
+    return searchImages(this.query);
+  },
+};
+
 const form = document.querySelector('form#search-form');
 const gallery = document.querySelector('div.gallery');
 const loadMoreBtn = document.querySelector('button.load-more');
 
 function renderImages(queriesArray) {
-  const markup = queriesArray
-    .map(item => {
-      return `<div class="photo-card">
-    <div class="thumb"><img src="${item.webformatURL}" alt="${item.tags}" loading="lazy" /></div>
+  const markup = queriesArray.map(item => {
+    return `<div class="photo-card">
+    <div class="thumb"><img class="gallery__image" src="${item.webformatURL}" alt="${item.tags}" loading="lazy" /></div>
     <div class="info">
+    <ul class="gallery__item">
+    <li class="gallery__link">
       <p class="info-item">
-        <b>Likes</b><span>${item.likes}</span>
+        <b>Likes </b><span>${item.likes}</span>
       </p>
       <p class="info-item">
-        <b>Views</b><span>${item.views}</span>
+        <b>Views </b><span>${item.views}</span>
       </p>
       <p class="info-item">
-        <b>Comments</b><span>${item.comments}</span>
+        <b>Comments </b><span>${item.comments}</span>
       </p>
       <p class="info-item">
-        <b>Downloads</b><span>${item.downloads}</span>
+        <b>Downloads </b><span>${item.downloads}</span>
       </p>
+      </li>
+      </ul>
     </div>
   </div>`;
-    })
-    .join('');
-  gallery.insertAdjacentHTML('beforeend', markup);
+  });
+  gallery.insertAdjacentHTML('beforeend', markup.join(''));
 }
 
 function onSubmit(e) {
   e.preventDefault();
   loadMoreBtn.classList.add('is-hidden');
   gallery.innerHTML = '';
-  pixabayAPI.query = e.currentTarget.elements.searchQuery.value.trim();
-  pixabayAPI.resetPage();
-  if (pixabayAPI.query === '') {
+  imageSearcher.query = e.currentTarget.elements.searchQuery.value.trim();
+  if (imageSearcher.query === '') {
     Notiflix.Notify.warning('Please enter your search query!');
     return;
   } else {
-    pixabayAPI
-      .getImage()
+    imageSearcher
+      .response()
       .then(data => {
         let queriesArray = data.hits;
         if (queriesArray.length === 0) {
           Notiflix.Notify.failure(
             'Sorry, there are no images matching your search query. Please try again.'
           );
-        } else if (queriesArray.length < 40) {
+        } else if (queriesArray.length === 40) {
           renderImages(queriesArray);
-          loadMoreBtn.classList.add('is-hidden');
+          loadMoreBtn.classList.remove('is-hidden');
           Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
         } else {
           renderImages(queriesArray);
@@ -73,7 +78,7 @@ function onSubmit(e) {
 }
 
 function onLoadMore() {
-  pixabayAPI.getImage().then(data => {
+  imageSearcher.response().then(data => {
     let queriesArray = data.hits;
     renderImages(queriesArray);
     if (queriesArray.length < 40) {
@@ -81,6 +86,9 @@ function onLoadMore() {
       Notiflix.Notify.info(
         "We're sorry, but you've reached the end of search results."
       );
+    } else {
+      loadMoreBtn.classList.remove('is-hidden');
+      renderImages(queriesArray);
     }
   });
 }
