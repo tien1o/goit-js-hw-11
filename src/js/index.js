@@ -18,8 +18,9 @@ function resetSearch() {
 
 async function onSubmit(e) {
   e.preventDefault();
+  page = 1;
+  console.log(`OnSubmit page: ${page}`);
   resetSearch();
-  console.log(page);
   query = e.currentTarget.elements.searchQuery.value.trim();
   if (query === '') {
     Notiflix.Notify.warning('Please enter your search query!');
@@ -56,6 +57,7 @@ async function onLoadMore() {
     const data = await searchImages(query, page);
     let hits = data.hits;
     renderImages(hits);
+    console.log(`onLoadMore page: ${page}`);
     if (hits.length < 40) {
       loadMoreBtn.classList.add('is-hidden');
       Notiflix.Notify.info(
@@ -74,3 +76,4 @@ async function onLoadMore() {
 
 form.addEventListener('submit', onSubmit);
 loadMoreBtn.addEventListener('click', onLoadMore);
+export { page };

@@ -1,11 +1,12 @@
 import axios from 'axios';
 import Notiflix from 'notiflix';
-
+import { page } from '../js/index.js';
 const BASE_URL = 'https://pixabay.com/api/';
 const PER_PAGE = 40;
-let page = 1;
+//let page = 1;
 
 async function searchImages(query) {
+  console.log(`Num. page on backend: ${page}`);
   const params = {
     key: '35867918-4e3839490958f79a97499fa36',
     q: query,
