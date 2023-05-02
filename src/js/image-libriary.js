@@ -20,7 +20,6 @@ async function searchImages(query) {
     const response = await axios.get(`${BASE_URL}?`, { params });
     const totalHits = response.data.totalHits;
     const hits = response.data.hits;
-    page++;
     return { totalHits, hits };
   } catch (error) {
     Notiflix.Notify.failure(
